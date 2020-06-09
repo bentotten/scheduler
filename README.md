@@ -1,5 +1,5 @@
 # Scheduler
-A discord bot I wrote in python for scheduling friends availablity to go bouldering. Eventually going to port to Slack/Rocketchat
+A discord bot I wrote in python for scheduling games. 
 
 ::Token::
 
