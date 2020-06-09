@@ -13,9 +13,18 @@ import math
 from datetime import datetime
 from discord.ext import commands
 from dotenv import load_dotenv
-import jack
+
+print(f'Loading...')
+
+# Role ID for later pinging
+# TODO read in from file
+role = "719841601018658906"
 
 # Data structure
+games = {}
+players = []
+
+# Week data structure
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
         'sun': {}}
 
@@ -43,20 +52,32 @@ async def on_ready():
 @bot.command(name='ping')
 async def ping(ctx):
     # Attempt to ping user
-    msg = ctx.author.mention + ' Pong!'
+    msg = ctx.author.mention + ' pong!'
     await ctx.send(msg)
 
 
 # Help Command
 @bot.command(name='commands', help="List of commands")
 async def help(ctx):
-    signature = 'Bot made by hurricane 2019'
-    message = '!now: pings climbers available in the next hour'
-    await ctx.send(message)
-    message = '!schedule: saves availability in format day start time \'to\' \
-        end time. Ex: mon 0600 to 1200'
+    signature = '[Bot made by Ben Hurricane 2020]'
+    message = '!Game team kickoff-time away/home: Pings active players and \
+        informs them we\'re playing, what time kickoff is, and home/away'
     await ctx.send(message)
     await ctx.send(signature)
+
+
+# Ping active players & store response to attendance for game
+@bot.command(name='Game', help='Ex: ORSU 11:00am Away')
+async def Game(ctx, team='', start='', location=''):
+    message = ("<@&" + role + "> Roll call!")
+    game = ("LUMBERJACKS vs " + team.upper() + " (" + location.capitalize() +
+            ") at " + start)
+    prompt = ("Can you attend?")
+    await ctx.send(message)
+    await ctx.send(game)
+
+    msg = await ctx.send(prompt)
+    await msg.add_reaction('👍')
 
 
 # !Now command
