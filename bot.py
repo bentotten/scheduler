@@ -13,7 +13,7 @@ import math
 from datetime import datetime
 from discord.ext import commands
 from dotenv import load_dotenv
-
+import jack
 
 # Data structure
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
@@ -27,8 +27,9 @@ weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
 accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 # Token Setup
+with open('token.txt') as f:
+    token = f.readline().strip()
 load_dotenv()
-token = # INSERT YOUR TOKEN HERE
 bot = commands.Bot(command_prefix='!')
 
 
