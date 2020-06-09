@@ -1,6 +1,10 @@
 # Scheduler
 A discord bot I wrote in python for scheduling friends availablity to go bouldering. Eventually going to port to Slack/Rocketchat
 
+::Token::
+
+Save bot token to a text file named token.txt
+
 ::Data structure::
 
 Nested dict of days containing a dict of times containing a list of user ID numbers.
