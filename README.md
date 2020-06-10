@@ -1,9 +1,10 @@
 # Scheduler
 A discord bot I wrote in python for scheduling games. 
 
-::Token::
+::Setup::
 
 Save bot token to a text file named token.txt
+Save bot role to a text file named role.txt
 
 ::Data structure::
 
@@ -14,6 +15,7 @@ Stores to .json
 ::Commands::
 - Ping - responds with pong
 - Help - lists commands and descriptions
+- Game - pings active players and emoji reacts itself to indicate attendance to upcoming game
 - Now - pings users who are scheduled in the next hour
 - Schedule - Adds user to data structure at times specified by user (also appends the json)
 - All - Shows Weeks schedule on the terminal
@@ -22,7 +24,6 @@ Stores to .json
 - Implement faster fetching algorithms 
 - Unschedule function
 - read-in from json on launch
-- Enable matrix bridged users to participate from a bot
 - Put cap on max number of scheduled at a specific time, to prevent trolling friends from DOS'ing for the lols
 - Fix Try block to be more specific
 - Strip extra characters out of !now output
