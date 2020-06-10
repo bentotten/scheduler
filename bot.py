@@ -53,12 +53,11 @@ async def on_member_join(user):
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
     msg = (f'{user.display_name} added {reaction}'
-           + f'to \"*{reaction.message.content}*\"')
+           + f'to `{reaction.message.content}`')
     with open('msg_id.txt') as f:
         id = f.readline().strip()  # Read in id from file
 #    await channel.send(f'{msg}')
-    if int(id) == reaction.message.id and user != bot_id:
-        await channel.send('Match found excluding bot')
+    if int(id) == reaction.message.id and str(user) != bot_id:
         await channel.send(msg)
 
 
@@ -93,7 +92,6 @@ async def Game(ctx, team='', start='', location=''):
     msg = await ctx.send(prompt)
 
     # Write message ID out to file for later collection
-    await ctx.send(f'ID: {msg.id}')
     with open('msg_id.txt', 'w') as f:
         f.write(str(msg.id))
     f.close()
