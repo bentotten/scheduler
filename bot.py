@@ -16,9 +16,6 @@ from dotenv import load_dotenv
 
 print(f'Loading...')
 
-# Role ID for later pinging
-# TODO read in from file
-role = "719841601018658906"
 
 # Data structure
 games = {}
@@ -35,11 +32,13 @@ weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
 # for error checking
 accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-# Token Setup
+# Bot Setup
 with open('token.txt') as f:
     token = f.readline().strip()
 load_dotenv()
 bot = commands.Bot(command_prefix='!')
+with open('role.txt') as f:
+    role = f.readline().strip()
 
 
 # Join message
@@ -69,7 +68,7 @@ async def help(ctx):
 # Ping active players & store response to attendance for game
 @bot.command(name='Game', help='Ex: ORSU 11:00am Away')
 async def Game(ctx, team='', start='', location=''):
-    message = ("<@&" + role + "> Roll call!")
+    message = ("<@&" + role + "> GAME INFORMATION")
     game = ("LUMBERJACKS vs " + team.upper() + " (" + location.capitalize() +
             ") at " + start)
     prompt = ("Can you attend?")
