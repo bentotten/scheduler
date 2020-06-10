@@ -10,43 +10,51 @@
 
 import json
 import math
-import asyncio
 from datetime import datetime
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
 print(f'Loading...')
 
 
-# Data structure
+# Data structured
 games = {}
-
-# Week data structure
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
         'sun': {}}
-
-# Hash for time conversions
 weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
-           6: 'sun'}
-
-# for error checking
-accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+           6: 'sun'}  # Hash for time conversions
+accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']  # Error chec
 
 # Bot Setup
-with open('token.txt') as f:
-    token = f.readline().strip()
-load_dotenv()
 bot = commands.Bot(command_prefix='!')
+with open('token.txt') as f:
+    token = f.readline().strip()  # Read in token from file
 with open('role.txt') as f:
-    role = f.readline().strip()
+    role = f.readline().strip()  # Read in active player role from file
+load_dotenv()
 
 
-# Join message
-@bot.event
+# Bot Events
+@bot.event  # Connet Message
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+    print(discord.__version__)
 
 
+@bot.event  # Join Message
+async def on_member_join(user):
+    msg = 'Welcome to the Team {user}!'
+    await user.send(msg)
+
+
+@bot.event  # Triggers on reaction
+async def on_reaction_add(reaction, user):
+    channel = reaction.message.channel
+    msg = f'{user} added {reaction} to \"*{reaction.message.content}*\"'
+    await channel.send(f'{msg}')
+
+# Bot Commands
 # Ping
 @bot.command(name='ping')
 async def ping(ctx):
@@ -65,13 +73,13 @@ async def help(ctx):
     await ctx.send(signature)
 
 
-# Ping active players & store response to attendance for game
+# Game command: Ping active players & store response to attendance for game
 @bot.command(name='g', help='Ex: ORSU 11:00am Away')
 async def Game(ctx, team='', start='', location=''):
     users = ""  # variable for later collecting reactions
 
     message = (f"<@&{role}>")
-    game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) at {start}")
+    game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) {start}")
     prompt = ("Can you attend?")
     await ctx.send(message)
     await ctx.send(game)
@@ -79,16 +87,6 @@ async def Game(ctx, team='', start='', location=''):
     msg = await ctx.send(prompt)
     await msg.add_reaction('\u2705')  # Green check for yes
     await msg.add_reaction('\u274C')  # Red X for no
-
-    # Tally reactions
-    await asyncio.sleep(5)
-    msg = await msg.channel.fetch_message(msg.id)  # refetch message
-
-    reactions = msg.reactions
-    # Read reactions
-    async for user in reactions.users():
-        users += user.name + ", "
-    await ctx.send(content=f"user: {users}")
 
 
 # !Now command
@@ -183,4 +181,4 @@ def sched_error_check(ctx, day, start, stop):
     return "pass"
 
 
-bot.run(token)
+bot.run(token)  # Launch bot
