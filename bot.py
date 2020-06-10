@@ -27,6 +27,7 @@ weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
 accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']  # Error chec
 
 # Bot Setup
+bot_id = 'Jack#1847'
 bot = commands.Bot(command_prefix='!')
 with open('token.txt') as f:
     token = f.readline().strip()  # Read in token from file
@@ -44,15 +45,22 @@ async def on_ready():
 
 @bot.event  # Join Message
 async def on_member_join(user):
-    msg = 'Welcome to the Team {user}!'
+    msg = 'Welcome to the Team {user.display_name}!'
     await user.send(msg)
 
 
-@bot.event  # Triggers on reaction
+@bot.event  # Triggers on reaction to game message
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
-    msg = f'{user} added {reaction} to \"*{reaction.message.content}*\"'
-    await channel.send(f'{msg}')
+    msg = (f'{user.display_name} added {reaction}'
+           + f'to \"*{reaction.message.content}*\"')
+    with open('msg_id.txt') as f:
+        id = f.readline().strip()  # Read in id from file
+#    await channel.send(f'{msg}')
+    if int(id) == reaction.message.id and user != bot_id:
+        await channel.send('Match found excluding bot')
+        await channel.send(msg)
+
 
 # Bot Commands
 # Ping
@@ -76,15 +84,21 @@ async def help(ctx):
 # Game command: Ping active players & store response to attendance for game
 @bot.command(name='g', help='Ex: ORSU 11:00am Away')
 async def Game(ctx, team='', start='', location=''):
-    users = ""  # variable for later collecting reactions
-
+    # Ping active players
     message = (f"<@&{role}>")
     game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) {start}")
     prompt = ("Can you attend?")
     await ctx.send(message)
     await ctx.send(game)
-
     msg = await ctx.send(prompt)
+
+    # Write message ID out to file for later collection
+    await ctx.send(f'ID: {msg.id}')
+    with open('msg_id.txt', 'w') as f:
+        f.write(str(msg.id))
+    f.close()
+
+    # Trigger initial reacts
     await msg.add_reaction('\u2705')  # Green check for yes
     await msg.add_reaction('\u274C')  # Red X for no
 
