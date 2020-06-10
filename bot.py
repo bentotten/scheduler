@@ -10,6 +10,7 @@
 
 import json
 import math
+import asyncio
 from datetime import datetime
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -19,7 +20,6 @@ print(f'Loading...')
 
 # Data structure
 games = {}
-players = []
 
 # Week data structure
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
@@ -66,17 +66,36 @@ async def help(ctx):
 
 
 # Ping active players & store response to attendance for game
-@bot.command(name='Game', help='Ex: ORSU 11:00am Away')
+@bot.command(name='g', help='Ex: ORSU 11:00am Away')
 async def Game(ctx, team='', start='', location=''):
-    message = ("<@&" + role + "> GAME INFORMATION")
-    game = ("LUMBERJACKS vs " + team.upper() + " (" + location.capitalize() +
-            ") at " + start)
+    message = (f"<@&{role}>")
+    game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()})\
+            at {start}")
     prompt = ("Can you attend?")
     await ctx.send(message)
     await ctx.send(game)
 
     msg = await ctx.send(prompt)
-    await msg.add_reaction('👍')
+    await msg.add_reaction('\u2705')  # Green check for yes
+    await msg.add_reaction('\u274C')  # Red X for no
+
+    # Tally reactions
+    await asyncio.sleep(5)
+    msg = await msg.channel.fetch_message(msg.id)  # refetch message
+    # default values
+    positive = 0
+    negative = 0
+    for reaction in msg.reactions:
+        if reaction.emoji == '\u2705':
+            positive = reaction.count - 1  # For bot's first reaction
+        if reaction.emoji == '\u274C':
+            negative = reaction.count - 1
+    await ctx.send(f'\u2705: {positive} \u274C: {negative}')
+
+    # Read reactions
+    reaction = msg.reaction.users()
+    async for user in reaction:
+        await ctx.send('{0} has reacted with {1.emoji}!'.format(user, msg.reaction))
 
 
 # !Now command
