@@ -68,9 +68,10 @@ async def help(ctx):
 # Ping active players & store response to attendance for game
 @bot.command(name='g', help='Ex: ORSU 11:00am Away')
 async def Game(ctx, team='', start='', location=''):
+    users = ""  # variable for later collecting reactions
+
     message = (f"<@&{role}>")
-    game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()})\
-            at {start}")
+    game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) at {start}")
     prompt = ("Can you attend?")
     await ctx.send(message)
     await ctx.send(game)
@@ -82,20 +83,12 @@ async def Game(ctx, team='', start='', location=''):
     # Tally reactions
     await asyncio.sleep(5)
     msg = await msg.channel.fetch_message(msg.id)  # refetch message
-    # default values
-    positive = 0
-    negative = 0
-    for reaction in msg.reactions:
-        if reaction.emoji == '\u2705':
-            positive = reaction.count - 1  # For bot's first reaction
-        if reaction.emoji == '\u274C':
-            negative = reaction.count - 1
-    await ctx.send(f'\u2705: {positive} \u274C: {negative}')
 
+    reactions = msg.reactions
     # Read reactions
-    reaction = msg.reaction.users()
-    async for user in reaction:
-        await ctx.send('{0} has reacted with {1.emoji}!'.format(user, msg.reaction))
+    async for user in reactions.users():
+        users += user.name + ", "
+    await ctx.send(content=f"user: {users}")
 
 
 # !Now command
