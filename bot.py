@@ -19,7 +19,6 @@ print(f'Loading...')
 
 
 # Data structured
-games = {}
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
         'sun': {}}
 weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
@@ -51,14 +50,22 @@ async def on_member_join(user):
 
 @bot.event  # Triggers on reaction to game message
 async def on_reaction_add(reaction, user):
-    channel = reaction.message.channel
-    msg = (f'{user.display_name} added {reaction}'
-           + f'to `{reaction.message.content}`')
+    name = user.display_name
+#    channel = reaction.message.channel
+#    msg = (f'{user.display_name} added {reaction}'
+#           + f'to `{reaction.message.content}`')
     with open('msg_id.txt') as f:
         id = f.readline().strip()  # Read in id from file
-#    await channel.send(f'{msg}')
     if int(id) == reaction.message.id and str(user) != bot_id:
-        await channel.send(msg)
+        # TODO do in json instead
+        if reaction.emoji == '\u2705':
+            with open('roster.txt', 'a+') as f:
+                f.write(name + '\n')
+            f.close()
+        elif reaction.emoji == '\u274C':
+            with open('not_attending.txt', 'a+') as f:
+                f.write(name + '\n')
+            f.close()
 
 
 # Bot Commands
@@ -74,15 +81,16 @@ async def ping(ctx):
 @bot.command(name='commands', help="List of commands")
 async def help(ctx):
     signature = '[Bot made by Ben Hurricane 2020]'
-    message = '!Game team kickoff-time away/home: Pings active players and \
-        informs them we\'re playing, what time kickoff is, and home/away'
+    message = '!Game team kickoff-time away/home: Pings active players and'
+    + 'informs them we\'re playing, what time kickoff is, and home/away\n'
+    + '!roster displays roster for last made game'
     await ctx.send(message)
     await ctx.send(signature)
 
 
 # Game command: Ping active players & store response to attendance for game
-@bot.command(name='g', help='Ex: ORSU 11:00am Away')
-async def Game(ctx, team='', start='', location=''):
+@bot.command(name='g', help='Ex: !game ORSU 11:00am Away')
+async def game(ctx, team='', start='', location=''):
     # Ping active players
     message = (f"<@&{role}>")
     game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) {start}")
@@ -92,13 +100,27 @@ async def Game(ctx, team='', start='', location=''):
     msg = await ctx.send(prompt)
 
     # Write message ID out to file for later collection
-    with open('msg_id.txt', 'w') as f:
+    with open('msg_id.txt', 'w+') as f:
         f.write(str(msg.id))
     f.close()
 
     # Trigger initial reacts
     await msg.add_reaction('\u2705')  # Green check for yes
     await msg.add_reaction('\u274C')  # Red X for no
+
+
+@bot.command(name='roster', help='Ex: !roster')
+async def roster(ctx):
+    await ctx.send('Attending:')
+    with open('roster.txt', 'r') as f:
+        for line in enumerate(f):
+            await ctx.send("{}".format(line))
+    f.close()
+    await ctx.send('Not Attending:')
+    with open('not_attending.txt', 'r') as f:
+        for line in enumerate(f):
+            await ctx.send("{}".format(line))
+    f.close()
 
 
 # !Now command
