@@ -62,7 +62,7 @@ async def on_reaction_add(reaction, user):
                 f.write(name + '\n')
             f.close()
         elif reaction.emoji == '\u274C':
-            user.send(msg)  # Prompts for reason for decline
+            await user.send(msg)  # Prompts for reason for decline
             with open('not_attending.txt', 'a+') as f:
                 f.write(name + '\n')
             f.close()
