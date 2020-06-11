@@ -65,24 +65,41 @@ async def on_reaction_add(reaction, user):
     keys = []
     name = user.display_name
     msg = ('(Optional) Reason for decline:')
-    msg_id = reaction.message.id
+    msg_id = str(reaction.message.id)
+    chan = bot.get_channel(718602998393208893)  # TODO DELETE ME AFTER TEST
 
     # Read in keys  TODO Read on boot instead
-    with open('keys.csv', 'r') as f:
-        keys = f.read().split(',')
-    if msg_id not in keys and str(user) != bot_id:
-        with open('roster.json', 'r') as f:  # Read in roster
-            games = json.load(f)
-        if reaction.emoji == '\u2705':
-            games[msg_id]['Confirmed'] = name
-            with open('roster.json', 'a+') as f:
-                json.dump(games, f)
-        elif reaction.emoji == '\u274C':
-            await user.send(msg)  # Prompts for reason for decline
-            # TODO Store reply as save in games{}
-            games[msg_id]['Not Attending'] = name
-            with open('roster.json', 'a+') as f:
-                json.dump(name, f)
+    try:
+        with open('keys.txt', 'r') as f:
+            keys = f.read().strip().split(',')
+        await chan.send(f'Keys: {keys}')
+    except FileNotFoundError:
+        print('keys.txt does not exist')
+
+    # Search for key then write out
+    if msg_id in keys and str(user) != bot_id:
+        try:
+            with open('roster.json', 'r') as f:  # Read in roster
+                games = json.load(f)
+            await chan.send(f'Games read in: {games}')
+
+            # If confirmed
+            if reaction.emoji == '\u2705':
+                games[msg_id]['Confirmed'].append(name)
+                await chan.send(f'Games appended: {games[msg_id]}')
+                with open('roster.json', 'a+') as f:
+                    json.dump(games, f)
+
+            # If declined
+            elif reaction.emoji == '\u274C':
+                await user.send(msg)  # Prompts for reason for decline
+                # TODO Store reply as save in games{}
+                games[msg_id]['Not Attending'].append(name)
+                await chan.send(f'Games appended: {games[msg_id]}')
+                with open('roster.json', 'a+') as f:
+                    json.dump(name, f)
+        except FileNotFoundError:
+            print('Unable to open file')
 
 
 # Bot Commands
@@ -119,20 +136,21 @@ async def game(ctx, team='', start='', location=''):
 
     # TODO maybe write to different files but read into same dict
     # Read in most recent keys TODO potentiall duplicate
-    await ctx.send('Attempting to open keys.csv')
-    with open('keys.txt', 'r') as f:
-        keys = f.read().strip().split(',')
-    await ctx.send(f'Keys read in: {keys}')
+    try:
+        with open('keys.txt', 'r') as f:
+            keys = f.read().strip().split(',')
+    except FileNotFoundError:
+        print('keys.txt does not exist')
 
     # Save to data structure
-    if msg.id not in keys:
-        keys.append(msg.id)
-        games[msg.id] = {msg.id: {"Confirmed": [], "Not Attending": []}}
-        await ctx.send(f'ID: {msg.id} --- Appended Keys: {keys}')
+    msg_id = str(msg.id)
+    if msg_id not in keys:
+        keys.append(msg_id)
+        games[msg_id] = {"Confirmed": [], "Not Attending": []}
 
         with open('roster.json', 'w+') as f:
             json.dump(games, f)
-        with open('keys.csv', mode='w+') as f:
+        with open('keys.txt', mode='w+') as f:
             for line in keys:
                 f.write("%s," % line)
 
@@ -143,10 +161,13 @@ async def game(ctx, team='', start='', location=''):
 
 @bot.command(name='roster', help='Ex: !roster')
 async def roster(ctx):
-    with open('roster.json', 'r') as roster.json:
-        data = json.load(roster.json)
-
-    await ctx.send(f'Raw: {data}')
+    data = {}
+    try:
+        with open('roster.json', 'r+') as roster.json:
+            data = json.load(roster.json)
+        await ctx.send(f'Raw: {data}')
+    except FileNotFoundError:
+        print('roster.json does not exist')
 
 
 # !Now command
