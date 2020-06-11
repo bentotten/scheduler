@@ -44,16 +44,15 @@ async def on_ready():
 
 @bot.event  # Join Message
 async def on_member_join(user):
+    channel = bot.get_channel(718602289098784792)
     msg = 'Welcome to the Team {user.display_name}!'
-    await user.send(msg)
+    await channel.send(msg)
 
 
 @bot.event  # Triggers on reaction to game message
 async def on_reaction_add(reaction, user):
     name = user.display_name
-#    channel = reaction.message.channel
-#    msg = (f'{user.display_name} added {reaction}'
-#           + f'to `{reaction.message.content}`')
+    msg = ('(Optional) Reason for decline:')
     with open('msg_id.txt') as f:
         id = f.readline().strip()  # Read in id from file
     if int(id) == reaction.message.id and str(user) != bot_id:
@@ -63,6 +62,7 @@ async def on_reaction_add(reaction, user):
                 f.write(name + '\n')
             f.close()
         elif reaction.emoji == '\u274C':
+            user.send(msg)  # Prompts for reason for decline
             with open('not_attending.txt', 'a+') as f:
                 f.write(name + '\n')
             f.close()
@@ -213,6 +213,14 @@ def sched_error_check(ctx, day, start, stop):
         return "Please enter a valid 24h time"
 
     return "pass"
+
+
+# Shutdown bot
+@bot.command(name='sleep', help='Shutsdown bot')
+@commands.has_permissions(administrator=True)
+async def close(ctx):
+    await bot.close()
+    print("Shutwdown Complete")
 
 
 bot.run(token)  # Launch bot
