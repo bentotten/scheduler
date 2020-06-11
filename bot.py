@@ -18,7 +18,9 @@ from dotenv import load_dotenv
 print(f'Loading...')
 
 
-# Data structured
+# Data structurs
+data = ["Games": {"Message ID": '', "Confirmed": [], "Not Attending": []}]
+
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
         'sun': {}}
 weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
@@ -53,19 +55,22 @@ async def on_member_join(user):
 async def on_reaction_add(reaction, user):
     name = user.display_name
     msg = ('(Optional) Reason for decline:')
-    with open('msg_id.txt') as f:
-        id = f.readline().strip()  # Read in id from file
-    if int(id) == reaction.message.id and str(user) != bot_id:
-        # TODO do in json instead
-        if reaction.emoji == '\u2705':
-            with open('roster.txt', 'a+') as f:
-                f.write(name + '\n')
-            f.close()
-        elif reaction.emoji == '\u274C':
-            await user.send(msg)  # Prompts for reason for decline
-            with open('not_attending.txt', 'a+') as f:
-                f.write(name + '\n')
-            f.close()
+
+    # send
+    with open('roster.json', 'r') as roster.json:
+        data = json.load(roster.json)
+
+    for key in data:
+        if data[key] == reaction.message.id and str(user) != bot_id:
+            if reaction.emoji == '\u2705':
+                with open('roster.json', 'a+') as f:
+                    json.dump(name, f)
+                f.close()
+            elif reaction.emoji == '\u274C':
+                await user.send(msg)  # Prompts for reason for decline
+                with open('roster.json', 'a+') as f:
+                    json.dump(name, f)
+                f.close()
 
 
 # Bot Commands
@@ -100,9 +105,9 @@ async def game(ctx, team='', start='', location=''):
     msg = await ctx.send(prompt)
 
     # Write message ID out to file for later collection
-    with open('msg_id.txt', 'w+') as f:
-        f.write(str(msg.id))
-    f.close()
+    Games["Message ID"] = msg.id
+    with open('roster.json', 'w+') as f:
+        json.dump(data, f)
 
     # Trigger initial reacts
     await msg.add_reaction('\u2705')  # Green check for yes
@@ -111,16 +116,10 @@ async def game(ctx, team='', start='', location=''):
 
 @bot.command(name='roster', help='Ex: !roster')
 async def roster(ctx):
-    await ctx.send('Attending:')
-    with open('roster.txt', 'r') as f:
-        for line in enumerate(f):
-            await ctx.send("{}".format(line))
-    f.close()
-    await ctx.send('Not Attending:')
-    with open('not_attending.txt', 'r') as f:
-        for line in enumerate(f):
-            await ctx.send("{}".format(line))
-    f.close()
+    with open('roster.json', 'r') as roster.json:
+        data = json.load(roster.json)
+
+    await ctx.send(f'Raw: {data}')
 
 
 # !Now command
