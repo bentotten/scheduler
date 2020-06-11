@@ -14,13 +14,16 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+#  import csv
 
 print(f'Loading...')
 
 
-# Data structurs
-data = ["Games": {"Message ID": '', "Confirmed": [], "Not Attending": []}]
-
+#  Data structurs
+#  games = {'': {"Confirmed": [], "Not Attending": []}}  # store msg id
+#  TODO clean me up
+games = {}
+keys = []
 week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
         'sun': {}}
 weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
@@ -43,6 +46,12 @@ async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     print(discord.__version__)
 
+    #  TODO have read in on start
+    #  Read in most recent keys
+    #    with open('keys.csv', newline='') as f:
+    #        reader = csv.reader(f)
+    #        keys = list(reader)
+
 
 @bot.event  # Join Message
 async def on_member_join(user):
@@ -53,24 +62,27 @@ async def on_member_join(user):
 
 @bot.event  # Triggers on reaction to game message
 async def on_reaction_add(reaction, user):
+    keys = []
     name = user.display_name
     msg = ('(Optional) Reason for decline:')
+    msg_id = reaction.message.id
 
-    # send
-    with open('roster.json', 'r') as roster.json:
-        data = json.load(roster.json)
-
-    for key in data:
-        if data[key] == reaction.message.id and str(user) != bot_id:
-            if reaction.emoji == '\u2705':
-                with open('roster.json', 'a+') as f:
-                    json.dump(name, f)
-                f.close()
-            elif reaction.emoji == '\u274C':
-                await user.send(msg)  # Prompts for reason for decline
-                with open('roster.json', 'a+') as f:
-                    json.dump(name, f)
-                f.close()
+    # Read in keys  TODO Read on boot instead
+    with open('keys.csv', 'r') as keys.csv:
+        keys = keys.csv.read().split(',')
+    if msg_id not in keys and str(user) != bot_id:
+        with open('roster.json', 'r') as roster.json:  # Read in roster
+            games = json.load(roster.json)
+        if reaction.emoji == '\u2705':
+            games[msg_id]['Confirmed'] = name
+            with open('roster.json', 'a+') as f:
+                json.dump(games, f)
+        elif reaction.emoji == '\u274C':
+            await user.send(msg)  # Prompts for reason for decline
+            # TODO Store reply as save in games{}
+            games[msg_id]['Not Attending'] = name
+            with open('roster.json', 'a+') as f:
+                json.dump(name, f)
 
 
 # Bot Commands
@@ -97,6 +109,7 @@ async def help(ctx):
 @bot.command(name='g', help='Ex: !game ORSU 11:00am Away')
 async def game(ctx, team='', start='', location=''):
     # Ping active players
+    keys = []
     message = (f"<@&{role}>")
     game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) {start}")
     prompt = ("Can you attend?")
@@ -104,10 +117,24 @@ async def game(ctx, team='', start='', location=''):
     await ctx.send(game)
     msg = await ctx.send(prompt)
 
-    # Write message ID out to file for later collection
-    Games["Message ID"] = msg.id
-    with open('roster.json', 'w+') as f:
-        json.dump(data, f)
+    # TODO maybe write to different files but read into same dict
+    # Read in most recent keys TODO potentiall duplicate
+    await ctx.send('Attempting to open keys.csv')
+    with open('keys.txt', 'r') as f:
+        keys = f.read().strip().split(',')
+    await ctx.send(f'Keys read in: {keys}')
+
+    # Save to data structure
+    if msg.id not in keys:
+        keys.append(msg.id)
+        games[msg.id] = {msg.id: {"Confirmed": [], "Not Attending": []}}
+        await ctx.send(f'ID: {msg.id} --- Appended Keys: {keys}')
+
+        with open('roster.json', 'w+') as f:
+            json.dump(games, f)
+        with open('keys.csv', mode='w+') as f:
+            for line in keys:
+                f.write("%s," % line)
 
     # Trigger initial reacts
     await msg.add_reaction('\u2705')  # Green check for yes
