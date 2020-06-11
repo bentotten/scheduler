@@ -68,11 +68,11 @@ async def on_reaction_add(reaction, user):
     msg_id = reaction.message.id
 
     # Read in keys  TODO Read on boot instead
-    with open('keys.csv', 'r') as keys.csv:
-        keys = keys.csv.read().split(',')
+    with open('keys.csv', 'r') as f:
+        keys = f.read().split(',')
     if msg_id not in keys and str(user) != bot_id:
-        with open('roster.json', 'r') as roster.json:  # Read in roster
-            games = json.load(roster.json)
+        with open('roster.json', 'r') as f:  # Read in roster
+            games = json.load(f)
         if reaction.emoji == '\u2705':
             games[msg_id]['Confirmed'] = name
             with open('roster.json', 'a+') as f:
