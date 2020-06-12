@@ -14,9 +14,19 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-#  import csv
+import db.py
 
 print(f'Loading...')
+
+
+# Stores message ID game is made in, confirmed, not attending, and player names
+class Game:
+    def __init__(self, id, confirmed, not_attending):
+        self.id = id
+        self.confirmed = confirmed
+        self.not_attending = not_attending
+        confirmed = []
+        not_attending = []
 
 
 #  Data structurs
@@ -46,18 +56,15 @@ async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     print(discord.__version__)
 
-    #  TODO have read in on start
-    #  Read in most recent keys
-    #    with open('keys.csv', newline='') as f:
-    #        reader = csv.reader(f)
-    #        keys = list(reader)
-
 
 @bot.event  # Join Message
 async def on_member_join(user):
     channel = bot.get_channel(718602289098784792)
-    msg = 'Welcome to the Team {user.display_name}!'
-    await channel.send(msg)
+    msg = 'has joined room! Welcome to the Team!'
+    dm = 'Welcome to the Lumberjacks Discord server! Please change your name' \
+        + ' by going to any channel and typing \\nick {YOUR FULL NAME}'
+    await channel.send(f'->   {user.display_name} {msg}')
+    await user.send(dm)  # Prompts user to change name
 
 
 @bot.event  # Triggers on reaction to game message
