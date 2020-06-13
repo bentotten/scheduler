@@ -14,7 +14,7 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-import db.py
+import functions.py
 
 print(f'Loading...')
 
