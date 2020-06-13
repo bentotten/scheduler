@@ -15,7 +15,7 @@ c = conn.cursor()   # Sets cursor
 
 # Connect
 def create_table(name):
-    print(f'Games: {name}')
+    print(f'Adding {name}')
     c.execute("CREATE TABLE IF NOT EXISTS " + name + """ (
                 mid INTEGER PRIMARY KEY,
                 name TEXT
@@ -25,7 +25,7 @@ def create_table(name):
 
 # Insert
 def insert_table(table, key, name):
-    c.execute(f"INSERT INTO {table} VALUES ('{key}', '{name}')")
+    c.execute(f"INSERT or IGNORE INTO {table} VALUES ('{key}', '{name}')")
     conn.commit()
 
 
