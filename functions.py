@@ -37,15 +37,15 @@ def create_table(table_name):
 # Insert
 def insert_table(table_name, key, name):
     table = scrub(table_name)  # scrub for injections
-    print(f"Attemping to insert {key} and {name} into {table}")
-    c.execute(f"INSERT or IGNORE INTO {table} VALUES (?, ?)", (key, '{name}'))
+    c.execute("INSERT or IGNORE INTO " + table + " VALUES (?, ?)",
+              (key, '{name}'))
     conn.commit()
 
 
 # Query
 def query(table_name, key):
     table = scrub(table_name)  # scrub for injections
-    c.execute(f"SELECT * FROM {table} WHERE mid=?", ('{key}',))
+    c.execute("SELECT * FROM " + table + " WHERE mid=?", ('{key}',))
     print(c.fetchall())
 
 
