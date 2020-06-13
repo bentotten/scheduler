@@ -21,10 +21,10 @@ def create_table(name):
                     mid INTEGER PRIMARY KEY,
                     name TEXT
                     )""")   # Create game table
-    else:
-        c.execute("CREATE TABLE IF NOT EXISTS " + name + """ (
+    elif name == 'roster':
+        c.execute("""CREATE TABLE IF NOT EXISTS roster (
                     mid INTEGER PRIMARY KEY,
-                    name TEXT,
+                    uid INTEGER,
                     attending INTEGER
                     )""")   # Create game table
     conn.commit()   # Commits current action
@@ -33,12 +33,6 @@ def create_table(name):
 # Insert
 def insert_table(table, key, name):
     c.execute(f"INSERT or IGNORE INTO {table} VALUES ('{key}', '{name}')")
-    conn.commit()
-
-
-# Insert
-def insert_roster(key, name, b):
-    c.execute(f"INSERT or IGNORE INTO roster VALUES ('{key}', '{name}', '{b})")
     conn.commit()
 
 
@@ -56,7 +50,6 @@ create_table('roster')  # Creates table for players
 # insert into tables
 insert_table('games', '111', 'ORSU')    # table, key, name
 insert_table('players', '1', 'Ben Totten')    # table, key, name
-insert_roster('roster', '1', '1')    # table, key, name
 query('games', '111')
 query('players', '1')
 query('roster', '1')
