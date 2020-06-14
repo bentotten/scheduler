@@ -37,10 +37,10 @@ def create_table(table_name):
 
 
 # Insert
-def insert_table(table_name, key, name):
+def insert(table_name, key, value):
     table = scrub(table_name)  # scrub for injections
     c.execute("INSERT or IGNORE INTO " + table + " VALUES (?, ?)",
-              (key, name))
+              (key, value))
     conn.commit()
 
 
@@ -51,15 +51,41 @@ def query(table_name, key):
     print(c.fetchall())
 
 
+def update_games(key, value):
+    c.execute("""UPDATE games SET name = ?
+              WHERE mid = ?""", (value, key))
+    conn.commit()
+
+
+def update_players(key, value):
+    c.execute("""UPDATE players SET name = ?
+              WHERE mid = ?""", (value, key))
+    conn.commit()
+
+
+def remove(table_name, key):
+    table = scrub(table_name)  # scrub for injections
+    c.execute("DELETE FROM " + table + " WHERE mid = ?", (key,))
+    conn.commit()
+
+
 # Create tables
 create_table('games')  # Creates table for games
 create_table('players')  # Creates table for players
 create_table('roster')  # Creates table for players
 
 # insert into tables
-insert_table('games', '111', 'ORSU')    # table, key, name
-insert_table('players', '1', 'Ben Totten')    # table, key, name
+insert('games', '111', 'ORSU')    # table, key, name
+insert('players', '1', 'Ben Totten')    # table, key, name
 query('games', '111')
+query('players', '1')
+update_games('111', 'orsu')  # Update who we're playing
+query('games', '111')
+update_players('1', 'Ben Scott')  # Update who we're playing
+query('players', '1')
+remove('games', '111')
+query('games', '111')
+remove('players', '1')
 query('players', '1')
 
 
