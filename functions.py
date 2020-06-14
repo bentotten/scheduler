@@ -9,7 +9,8 @@ import sqlite3
 # from bot.py import Game
 
 db = 'lumberjacks.db'    # Roster name
-conn = sqlite3.connect(db)  # Creates file
+# conn = sqlite3.connect(db)  # Creates file
+conn = sqlite3.connect(':memory:')  # Creates file
 c = conn.cursor()   # Sets cursor
 
 
@@ -18,6 +19,7 @@ def scrub(table_name):
 
 
 # Connect
+# TODO someday update to take a list of columns and loop through
 def create_table(table_name):
     name = scrub(table_name)  # scrub for injections
     if name != 'roster':
@@ -38,14 +40,14 @@ def create_table(table_name):
 def insert_table(table_name, key, name):
     table = scrub(table_name)  # scrub for injections
     c.execute("INSERT or IGNORE INTO " + table + " VALUES (?, ?)",
-              (key, '{name}'))
+              (key, name))
     conn.commit()
 
 
 # Query
 def query(table_name, key):
     table = scrub(table_name)  # scrub for injections
-    c.execute("SELECT * FROM " + table + " WHERE mid=?", ('{key}',))
+    c.execute("SELECT * FROM " + table + " WHERE mid=?", (key,))
     print(c.fetchall())
 
 
