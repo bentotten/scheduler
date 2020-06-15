@@ -36,7 +36,25 @@ def create_table(table_name):
     conn.commit()   # Commits current action
 
 
-# Insert
+# Show all tables
+def show_tables():
+    c.execute("SELECT name from sqlite_master where type='table'")
+    return (c.fetchall())
+
+
+# Show all data
+def show_data():
+    tables = show_tables()
+    rows = []
+    i = 0
+    for row in tables:
+        x = scrub(row)
+        c.execute("SELECT * FROM " + x)
+        rows.insert(i, c.fetchall())
+    return rows
+
+
+# Basic Primary Table functions
 def insert(table_name, key, value):
     table = scrub(table_name)  # scrub for injections
     c.execute("INSERT or IGNORE INTO " + table + " VALUES (?, ?)",
@@ -48,9 +66,10 @@ def insert(table_name, key, value):
 def query(table_name, key):
     table = scrub(table_name)  # scrub for injections
     c.execute("SELECT * FROM " + table + " WHERE mid=?", (key,))
-    print(c.fetchall())
+    return (c.fetchall())
 
 
+# Update
 def update_games(key, value):
     c.execute("""UPDATE games SET name = ?
               WHERE mid = ?""", (value, key))
@@ -63,6 +82,7 @@ def update_players(key, value):
     conn.commit()
 
 
+# Remove
 def remove(table_name, key):
     table = scrub(table_name)  # scrub for injections
     c.execute("DELETE FROM " + table + " WHERE mid = ?", (key,))
@@ -77,16 +97,14 @@ create_table('roster')  # Creates table for players
 # insert into tables
 insert('games', '111', 'ORSU')    # table, key, name
 insert('players', '1', 'Ben Totten')    # table, key, name
-query('games', '111')
-query('players', '1')
-update_games('111', 'orsu')  # Update who we're playing
-query('games', '111')
-update_players('1', 'Ben Scott')  # Update who we're playing
-query('players', '1')
-remove('games', '111')
-query('games', '111')
-remove('players', '1')
-query('players', '1')
+insert('games', '112', 'Pigs')    # table, key, name
+insert('players', '2', 'Justin Wood')    # table, key, name
+insert('games', '113', 'Seattle Quake')    # table, key, name
+insert('players', '3', 'John Smith')    # table, key, name
+print(query('games', '111'))
+print(query('players', '1'))
+print(show_tables())
+print(show_data())
 
 
 conn.commit()

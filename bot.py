@@ -21,16 +21,13 @@ print(f'Loading...')
 
 # Stores message ID game is made in, confirmed, not attending, and player names
 class Game:
-    def __init__(self, id, confirmed, not_attending):
+    def __init__(self, id):
         self.id = id
-        self.confirmed = confirmed
-        self.not_attending = not_attending
-        confirmed = []
-        not_attending = []
+        self.confirmed = []
+        self.not_attending = []
 
 
 #  Data structurs
-#  games = {'': {"Confirmed": [], "Not Attending": []}}  # store msg id
 #  TODO clean me up
 games = {}
 keys = []
