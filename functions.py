@@ -97,18 +97,24 @@ def remove(table_name, key):
 
 # Inserting into the roster
 def insert_roster(mid, uid, flag):
-    # Check if msg/player already exists TODO maybe can do in one line?
+    # Check if already recorded, if so update record
     c.execute("""SELECT mid, uid FROM roster WHERE EXISTS (
         SELECT * FROM roster WHERE mid = ? AND uid = ?)""", (mid, uid))
     exists = c.fetchone()
-    print("Exists: " + str(exists))
+
     if str(exists) == 'None':
         c.execute("INSERT or IGNORE INTO roster VALUES (?, ?, ?)",
                   (mid, uid, flag))
-        print("Inserted")
     else:
-        print("Record exists")
+        c.execute("""UPDATE roster SET attending = ?
+                  WHERE (mid = ? AND uid = ?)""", (flag, mid, uid))
+
     conn.commit()
+
+
+# Compile Roster
+def compile_roster_by_mid(mid):
+    
 
 
 # Create tables
@@ -125,6 +131,8 @@ insert('games', '113', 'Seattle Quake')    # table, key, name
 insert('players', '3', 'John Smith')    # table, key, name
 insert_roster('111', '1', '1')    # table, key, name
 insert_roster('111', '1', '0')    # table, key, name
+insert_roster('111', '2', '1')    # table, key, name
+insert_roster('112', '1', '1')    # table, key, name
 print(show_tables())
 print(show_data())
 
