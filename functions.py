@@ -24,16 +24,22 @@ def create_table(table_name):
     name = scrub(table_name)  # scrub for injections
     if name != 'roster':
         c.execute("CREATE TABLE IF NOT EXISTS " + name + """ (
-                    mid INTEGER PRIMARY KEY,
+                    mid INTEGER NOT NULL,
                     name TEXT
                     )""")   # Create game table
     elif name == 'roster':
         c.execute("""CREATE TABLE IF NOT EXISTS roster (
-                    mid INTEGER PRIMARY KEY,
-                    uid INTEGER,
-                    attending INTEGER
+                    mid INTEGER NOT NULL,
+                    uid INTEGER NOT NULL,
+                    attending INTEGER NOT NULL
                     )""")   # Create game table
     conn.commit()   # Commits current action
+
+
+def drop_table(table_name):
+    table = scrub(table_name)
+    c.execute("DROP table if exists " + table)
+    conn.commmit()
 
 
 # Show all tables
@@ -89,20 +95,36 @@ def remove(table_name, key):
     conn.commit()
 
 
+# Inserting into the roster
+def insert_roster(mid, uid, flag):
+    # Check if msg/player already exists TODO maybe can do in one line?
+    c.execute("""SELECT mid, uid FROM roster WHERE EXISTS (
+        SELECT * FROM roster WHERE mid = ? AND uid = ?)""", (mid, uid))
+    exists = c.fetchone()
+    print("Exists: " + str(exists))
+    if str(exists) == 'None':
+        c.execute("INSERT or IGNORE INTO roster VALUES (?, ?, ?)",
+                  (mid, uid, flag))
+        print("Inserted")
+    else:
+        print("Record exists")
+    conn.commit()
+
+
 # Create tables
 create_table('games')  # Creates table for games
 create_table('players')  # Creates table for players
 create_table('roster')  # Creates table for players
 
-# insert into tables
+# Test Commands
 insert('games', '111', 'ORSU')    # table, key, name
 insert('players', '1', 'Ben Totten')    # table, key, name
 insert('games', '112', 'Pigs')    # table, key, name
 insert('players', '2', 'Justin Wood')    # table, key, name
 insert('games', '113', 'Seattle Quake')    # table, key, name
 insert('players', '3', 'John Smith')    # table, key, name
-print(query('games', '111'))
-print(query('players', '1'))
+insert_roster('111', '1', '1')    # table, key, name
+insert_roster('111', '1', '0')    # table, key, name
 print(show_tables())
 print(show_data())
 
