@@ -10,6 +10,7 @@
 
 import json
 import math
+import time
 from datetime import datetime
 import discord
 from discord.ext import commands
@@ -36,6 +37,13 @@ week = {'mon': {}, 'tue': {}, 'wed': {}, 'thu': {}, 'fri': {}, 'sat': {},
 weekday = {0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu', 4: 'fri', 5: 'sat',
            6: 'sun'}  # Hash for time conversions
 accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']  # Error chec
+
+
+# Log setup TODO
+def log():
+    unix = int(time.time())
+    date = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
+
 
 # Bot Setup
 bot_id = 'Jack#1847'
