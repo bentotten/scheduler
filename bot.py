@@ -10,12 +10,13 @@
 
 import json
 import math
-import time
+# import time
 from datetime import datetime
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-import functions.py
+from functions import insert_wrap
+from functions import show_data
 
 print(f'Loading...')
 
@@ -40,9 +41,10 @@ accepted_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']  # Error chec
 
 
 # Log setup TODO
-def log():
-    unix = int(time.time())
-    date = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
+# def log():
+#    unix = int(time.time())
+#    date = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d' +
+#                       ' %H:%M:%S'))
 
 
 # Bot Setup
@@ -72,46 +74,38 @@ async def on_member_join(user):
     await user.send(dm)  # Prompts user to change name
 
 
-@bot.event  # Triggers on reaction to game message
-async def on_reaction_add(reaction, user):
-    keys = []
-    name = user.display_name
-    msg = ('(Optional) Reason for decline:')
-    msg_id = str(reaction.message.id)
-    chan = bot.get_channel(718602998393208893)  # TODO DELETE ME AFTER TEST
+# @bot.event  # Triggers on reaction to game message
+# async def on_reaction_add(reaction, user):
+#    name = user.display_name
+#    msg = ('(Optional) Reason for decline:')
+#    msg_id = str(reaction.message.id)
+#    chan = bot.get_channel(718602998393208893)  # TODO DELETE ME AFTER TEST
 
-    # Read in keys  TODO Read on boot instead
-    try:
-        with open('keys.txt', 'r') as f:
-            keys = f.read().strip().split(',')
-        await chan.send(f'Keys: {keys}')
-    except FileNotFoundError:
-        print('keys.txt does not exist')
+    # Send to sqlite functions and record
 
-    # Search for key then write out
-    if msg_id in keys and str(user) != bot_id:
-        try:
-            with open('roster.json', 'r') as f:  # Read in roster
-                games = json.load(f)
-            await chan.send(f'Games read in: {games}')
-
-            # If confirmed
-            if reaction.emoji == '\u2705':
-                games[msg_id]['Confirmed'].append(name)
-                await chan.send(f'Games appended: {games[msg_id]}')
-                with open('roster.json', 'a+') as f:
-                    json.dump(games, f)
-
-            # If declined
-            elif reaction.emoji == '\u274C':
-                await user.send(msg)  # Prompts for reason for decline
-                # TODO Store reply as save in games{}
-                games[msg_id]['Not Attending'].append(name)
-                await chan.send(f'Games appended: {games[msg_id]}')
-                with open('roster.json', 'a+') as f:
-                    json.dump(name, f)
-        except FileNotFoundError:
-            print('Unable to open file')
+#    if msg_id in keys and str(user) != bot_id:
+#        try:
+#            with open('roster.json', 'r') as f:  # Read in roster
+#                games = json.load(f)
+#            await chan.send(f'Games read in: {games}')
+#
+#            # If confirmed
+#            if reaction.emoji == '\u2705':
+#                games[msg_id]['Confirmed'].append(name)
+#                await chan.send(f'Games appended: {games[msg_id]}')
+#                with open('roster.json', 'a+') as f:
+#                    json.dump(games, f)
+#
+#            # If declined
+#            elif reaction.emoji == '\u274C':
+#                await user.send(msg)  # Prompts for reason for decline
+#                # TODO Store reply as save in games{}
+#                games[msg_id]['Not Attending'].append(name)
+#                await chan.send(f'Games appended: {games[msg_id]}')
+#                with open('roster.json', 'a+') as f:
+#                    json.dump(name, f)
+#        except FileNotFoundError:
+#            print('Unable to open file')
 
 
 # Bot Commands
@@ -138,7 +132,8 @@ async def help(ctx):
 @bot.command(name='g', help='Ex: !game ORSU 11:00am Away')
 async def game(ctx, team='', start='', location=''):
     # Ping active players
-    keys = []
+    data = []
+    # keys = []
     message = (f"<@&{role}>")
     game = (f"LUMBERJACKS vs {team.upper()} ({location.capitalize()}) {start}")
     prompt = ("Can you attend?")
@@ -146,29 +141,26 @@ async def game(ctx, team='', start='', location=''):
     await ctx.send(game)
     msg = await ctx.send(prompt)
 
-    # TODO maybe write to different files but read into same dict
-    # Read in most recent keys TODO potentiall duplicate
-    try:
-        with open('keys.txt', 'r') as f:
-            keys = f.read().strip().split(',')
-    except FileNotFoundError:
-        print('keys.txt does not exist')
-
     # Save to data structure
     msg_id = str(msg.id)
-    if msg_id not in keys:
-        keys.append(msg_id)
-        games[msg_id] = {"Confirmed": [], "Not Attending": []}
+#    if msg_id not in keys:
+#        keys.append(msg_id)
+#        games[msg_id] = {"Confirmed": [], "Not Attending": []}
 
-        with open('roster.json', 'w+') as f:
-            json.dump(games, f)
-        with open('keys.txt', mode='w+') as f:
-            for line in keys:
-                f.write("%s," % line)
+#        with open('roster.json', 'w+') as f:
+#            json.dump(games, f)
+#        with open('keys.txt', mode='w+') as f:
+#            for line in keys:
+#                f.write("%s," % line)
+    # Pass in table name, mid, and game name
+    insert_wrap('games', msg_id, 'GAME NAME GOES HERE')
 
     # Trigger initial reacts
     await msg.add_reaction('\u2705')  # Green check for yes
     await msg.add_reaction('\u274C')  # Red X for no
+
+    data = show_data()
+    await ctx.send(f'New data: {data}')
 
 
 @bot.command(name='roster', help='Ex: !roster')
