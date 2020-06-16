@@ -74,38 +74,34 @@ async def on_member_join(user):
     await user.send(dm)  # Prompts user to change name
 
 
-# @bot.event  # Triggers on reaction to game message
-# async def on_reaction_add(reaction, user):
-#    name = user.display_name
-#    msg = ('(Optional) Reason for decline:')
-#    msg_id = str(reaction.message.id)
-#    chan = bot.get_channel(718602998393208893)  # TODO DELETE ME AFTER TEST
+@bot.event  # Triggers on reaction to game message
+async def on_reaction_add(reaction, user):
+    name = user.display_name
+    msg = ('(Optional) Reason for decline:')
+    msg_id = str(reaction.message.id)
+    chan = bot.get_channel(718602998393208893)  # TODO DELETE ME AFTER TEST
 
     # Send to sqlite functions and record
 
-#    if msg_id in keys and str(user) != bot_id:
-#        try:
-#            with open('roster.json', 'r') as f:  # Read in roster
-#                games = json.load(f)
-#            await chan.send(f'Games read in: {games}')
-#
-#            # If confirmed
-#            if reaction.emoji == '\u2705':
+    if str(user) != bot_id:
+        try:
+            if reaction.emoji == '\u2705':
+                await chan.send(f"{name} Confirmed!")  # Prompts for reason for decline
 #                games[msg_id]['Confirmed'].append(name)
 #                await chan.send(f'Games appended: {games[msg_id]}')
 #                with open('roster.json', 'a+') as f:
 #                    json.dump(games, f)
 #
-#            # If declined
-#            elif reaction.emoji == '\u274C':
-#                await user.send(msg)  # Prompts for reason for decline
+            # If declined
+            elif reaction.emoji == '\u274C':
+                await user.send(msg)  # Prompts for reason for decline
 #                # TODO Store reply as save in games{}
 #                games[msg_id]['Not Attending'].append(name)
 #                await chan.send(f'Games appended: {games[msg_id]}')
 #                with open('roster.json', 'a+') as f:
 #                    json.dump(name, f)
-#        except FileNotFoundError:
-#            print('Unable to open file')
+        except FileNotFoundError:
+            print('Unable to open file')
 
 
 # Bot Commands

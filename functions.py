@@ -99,13 +99,12 @@ def show_data():
 
 
 # Basic Primary Table functions
-def insert(table_name, key, value):
+def insert(table, key, value):
     # Connect to db
     var = connect()
     conn = var[0]
     c = var[1]
 
-    table = scrub(table_name)  # scrub for injections
     c.execute("INSERT or IGNORE INTO " + table + " VALUES (?, ?)",
               (key, value))
     close(conn)
@@ -196,24 +195,27 @@ def compile_roster_by_mid(mid):
 
 
 # Wrappers
-def insert_wrap(table, key, value):
-    print(f"passing {table}, {key}, and {value} correctly")
+def insert_wrap(table_name, key_dirty, value_dirty):
+    table = scrub(table_name)  # scrub for injections
+    key = scrub(key_dirty)  # scrub for injections
+    value = scrub(value_dirty)  # scrub for injections
+    insert(table, key, value)
 
 
 # Test Commands
 create_table('games')  # Creates table for games
 create_table('players')  # Creates table for players
 create_table('roster')  # Creates table for players
-insert('games', '111', 'ORSU')    # table, key, name
-insert('players', '1', 'Ben Totten')    # table, key, name
+# insert('games', '111', 'ORSU')    # table, key, name
+# insert('players', '1', 'Ben Totten')    # table, key, name
 # insert('games', '112', 'Pigs')    # table, key, name
 # insert('players', '2', 'Justin Wood')    # table, key, name
 # insert('games', '113', 'Seattle Quake')    # table, key, name
 # insert('players', '3', 'John Smith')    # table, key, name
-insert_roster('111', '1', '1')    # table, key, name
+# insert_roster('111', '1', '1')    # table, key, name
 # insert_roster('111', '1', '0')    # table, key, name
 # insert_roster('111', '2', '1')    # table, key, name
 # insert_roster('112', '1', '1')    # table, key, name
-print(show_tables())
-print(show_data())
-compile_roster_by_mid('111')
+# print(show_tables())
+# print(show_data())
+# compile_roster_by_mid('111')
